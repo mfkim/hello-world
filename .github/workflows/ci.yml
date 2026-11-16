@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-run:
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: Linux (GCC / C89)
+            os: ubuntu-latest
+            cc: gcc
+            std: -std=c89
+
+          - label: Linux (GCC / C99)
+            os: ubuntu-latest
+            cc: gcc
+            std: -std=c99
+
+          - label: Linux (GCC / C11)
+            os: ubuntu-latest
+            cc: gcc
+            std: -std=c11
+
+          - label: Linux (GCC / C17)
+            os: ubuntu-latest
+            cc: gcc
+            std: -std=c17
+
+          - label: Linux (Clang / C17)
+            os: ubuntu-latest
+            cc: clang
+            std: -std=c17
+
+          - label: Linux (Clang / C23)
+            os: ubuntu-latest
+            cc: clang
+            std: -std=c23
+
+          - label: macOS (Apple Clang / C17)
+            os: macos-latest
+            cc: clang
+            std: -std=c17
+
+          - label: Windows (GCC / C17)
+            os: windows-latest
+            cc: gcc
+            std: -std=c17
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Build
+        run: ${{ matrix.cc }} -Wall -Wextra -Werror -pedantic ${{ matrix.std }} hello.c -o hello
+
+      - name: Run
+        run: ./hello
